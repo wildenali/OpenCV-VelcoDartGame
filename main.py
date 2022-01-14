@@ -112,8 +112,13 @@ while True:
         # cv2.drawContours(imgContours, poly, -1, color=(0, 255, 0), thickness=cv2.FILLED)
         cv2.drawContours(imgBlank, poly, -1, color=(0, 255, 0), thickness=cv2.FILLED)
 
+    # cvzone.putTextRect(imgContours, f'Total Score: {totalScore}', (10, 40), scale=2, offset=20)
+
+    
     imgBoardBaru = cv2.addWeighted(imgBoard, 0.7, imgBlank, 0.5, 0)
 
+    imgBoardBaru, _ = cvzone.putTextRect(imgBoardBaru, f'Total Score: {totalScore}', (10, 40), scale=2, offset=20)
+    
     imgStack = cvzone.stackImages([imgContours, imgBoardBaru], 2, 1)
 
     # end ================ Detect the ball stuck to the velco dart board
