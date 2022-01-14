@@ -4,13 +4,13 @@ import numpy as np
 from cvzone.ColorModule import ColorFinder  # for detect the ball color
 import pickle   # for labeling
 
-cap             = cv2.VideoCapture('VelcroDartGameFiles/Videos/Video2.mp4')
+cap             = cv2.VideoCapture('VelcroDartGameFiles/Videos/Video3.mp4')
 frameCounter    = 0
 cornerPoints    = [[377, 52], [944, 71], [261, 624], [1058, 612]]     # ini kordinat pixel ujung2 warna biru, soalnya gambarnya mau di pas in disini, kiriAtas=[377, 52], kananAtas=[944, 71], kiriBawah=[261, 624], kananBawah=[1058, 612]
 colorFinder     = ColorFinder(False)
 hsvVals         = {'hmin': 32, 'smin': 50, 'vmin': 0, 'hmax': 45, 'smax': 255, 'vmax': 255}
-# countHit        = 0
-# imgListBallsDetected = []
+countHit        = 0
+imgListBallsDetected = []
 # hitDrawBallInfoList  = []
 # totalScore      = 0
 
@@ -74,11 +74,30 @@ while True:
     imgBoard = getBoard(img)
     mask = detetColorDarts(imgBoard)
 
+    # ================ Detect the ball stuck to the velco dart board
+    ### remove the previous Detection
+    for x, img in enumerate(imgListBallsDetected):
+        mask = mask - img
+        cv2.imshow(str(x), mask)
+    # ================ Detect the ball stuck to the velco dart board
+    
+
     # find the contour of white are
     imgContours, conFound = cvzone.findContours(imgBoard, mask, 3500)   # 3500 is minimum area
 
-    # cv2.imwrite('img.png', imgBoard)
-    # cv2.imwrite('imgBoard.png', imgBoard)
+
+    # ================ Detect the ball stuck to the velco dart board
+    # the ball hits or not the board and wait for 5 iteration to make sure the ball hit and not fall down
+    if conFound:
+        countHit += 1
+        if countHit == 5:
+            imgListBallsDetected.append(mask)
+            print("Hit Detected")
+            countHit = 0
+    # end ================ Detect the ball stuck to the velco dart board
+
+    # cv2.imwrite('img.png', imgBoard)          # di pakai sekali
+    # cv2.imwrite('imgBoard.png', imgBoard)     # di pakai sekali
     cv2.imshow('Image',         img)
     cv2.imshow('ImageBoard',    imgBoard)
     cv2.imshow('Image Mask',    mask)

@@ -6,7 +6,7 @@ This game detect ball on the board
 1. Install Virtual Environment Windows
     - `$ pip install virtualenv`
     - `$ virtualenv env`
-    - `$ cd env/Scripts`
+    - `$ cd env\Scripts`
     - `$ activate.bat`
   
 2. Install cvzone, is wrapping the numpy and opencv-python 
