@@ -11,13 +11,13 @@ colorFinder     = ColorFinder(False)
 hsvVals         = {'hmin': 32, 'smin': 50, 'vmin': 0, 'hmax': 45, 'smax': 255, 'vmax': 255}
 countHit        = 0
 imgListBallsDetected = []
-# hitDrawBallInfoList  = []
-# totalScore      = 0
+hitDrawBallInfoList  = []
+totalScore      = 0
 
-# with open('polygons', 'rb') as f:
-#     polygonsWithScore = pickle.load(f)
-
-# # print(polygonsWithScore)
+with open('polygons', 'rb') as f:
+    polygonsWithScore = pickle.load(f)
+print("Polygon With Score nih:")
+print(polygonsWithScore)
 
 def getBoard(img):
     width, height = int(400*1.5), int(380*1.5)  # unit milimeter
@@ -90,10 +90,32 @@ while True:
     # the ball hits or not the board and wait for 5 iteration to make sure the ball hit and not fall down
     if conFound:
         countHit += 1
-        if countHit == 5:
+        if countHit == 10:
             imgListBallsDetected.append(mask)
             print("Hit Detected")
             countHit = 0
+
+            for polyScore in polygonsWithScore:
+                center = conFound[0]['center']
+                poly = np.array([polyScore[0]], np.int32)
+                inside = cv2.pointPolygonTest(poly, center, False)
+                print(inside)
+                if inside == 1:
+                    hitDrawBallInfoList.append([conFound[0]['bbox'], conFound[0]['center'], poly])  # bbox is boundingbox
+                    totalScore += polyScore[1]
+    print(totalScore)
+    imgBlank = np.zeros((imgContours.shape[0], imgContours.shape[1], 3), np.uint8)
+
+    for bbox, center, poly in hitDrawBallInfoList:
+        cv2.rectangle(imgContours, bbox, (255, 0, 255), 2)
+        cv2.circle(imgContours, center, 5, (0, 255, 0), cv2.FILLED)
+        # cv2.drawContours(imgContours, poly, -1, color=(0, 255, 0), thickness=cv2.FILLED)
+        cv2.drawContours(imgBlank, poly, -1, color=(0, 255, 0), thickness=cv2.FILLED)
+
+    imgBoardBaru = cv2.addWeighted(imgBoard, 0.7, imgBlank, 0.5, 0)
+
+    imgStack = cvzone.stackImages([imgContours, imgBoardBaru], 2, 1)
+
     # end ================ Detect the ball stuck to the velco dart board
 
     # cv2.imwrite('img.png', imgBoard)          # di pakai sekali
@@ -102,4 +124,6 @@ while True:
     cv2.imshow('ImageBoard',    imgBoard)
     cv2.imshow('Image Mask',    mask)
     cv2.imshow('Image Contours',imgContours)
+    cv2.imshow('Image BoardBaru',imgBoardBaru)
+    cv2.imshow('Image Stack',   imgStack)
     cv2.waitKey(1)     # if you need to slow down, change from 1 to 50
